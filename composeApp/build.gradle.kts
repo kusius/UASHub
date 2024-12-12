@@ -57,6 +57,11 @@ kotlin {
 android {
     namespace = "io.kusius.uashub"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
+    externalNativeBuild {
+        cmake {
+            path = file("./src/nativeInterop/cinterop/CMakeLists.txt")
+        }
+    }
 
     defaultConfig {
         applicationId = "io.kusius.uashub"

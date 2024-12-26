@@ -1,6 +1,9 @@
 /**
  * Version History:
  * 
+ * 0.0.2: 
+ * Added parse function without callback. Returns result in place and requires caller to give array 
+ * 
  * 0.0.1: 
  * Initial implementation and port of klvp library in an implementation without other dependencies.
  * For ease of use in other programs or embedded in other languages.
@@ -20,6 +23,7 @@ enum gmk_KLVValueType;
 struct gmk_KLVParser;
 
 GMKKLV struct gmk_KLVParser gmk_newKlvParser();
+GMKKLV int gmk_klvParseResult(struct gmk_KLVParser* parser, const uint8_t* chunk, const int length, struct gmk_KLVElement* result, const int resultSize);
 GMKKLV void gmk_klvParse(struct gmk_KLVParser* parser, const uint8_t* chunk, const int length, void (*onEndSetCallback)(struct gmk_KLVElement *, int));
 GMKKLV uint8_t gmk_klvKey(const struct gmk_KLVElement klv);
 
@@ -31,6 +35,7 @@ GMKKLV uint8_t gmk_klvKey(const struct gmk_KLVElement klv);
 // ntohs, ntohl
 #if  defined(_WIN32) || defined(WIN32)
  #include <Winsock2.h>
+ #pragma comment(lib, "Ws2_32.lib")
 #else 
  #include <netinet/in.h>
 #endif
@@ -134,7 +139,7 @@ typedef struct gmk__FPParser {
 } gmk__FPParser;
 
 gmk__FPParser gmk__fpParserOf(double min, double max, int length) {
-    gmk__FPParser fpParser = {};
+    gmk__FPParser fpParser = {0};
     fpParser.a = min;
     fpParser.b = max;
     fpParser.length = length;
@@ -403,10 +408,10 @@ typedef struct gmk_KLVParser {
 
 // Creates a properly initialized empty KLV parser
 GMKKLV gmk_KLVParser gmk_newKlvParser() {
-    gmk_KLVParser parser = {};
+    gmk_KLVParser parser = {0};
     parser.state = START_SET_KEY;
     for(int i = 0; i < MAX_UAS_TAGS; i++) {
-        parser.uasDataSet[i] = (gmk_KLVElement) {} ;
+        parser.uasDataSet[i] = (gmk_KLVElement) {0} ;
     }
 
     parser.uasDataSetSize = 0;
@@ -1875,7 +1880,7 @@ static int klvParse(gmk_KLVElement *klv, uint8_t *buf, size_t size) {
 
                 int64_t lVal;
                 memcpy(&lVal, klv->value, 8);
-                klv->uint64Value = ntohl(lVal);                       
+                klv->uint64Value = ntohl(lVal);
 
             } else {
                 *klv = GMK_KLVParseError(key);
@@ -3145,7 +3150,7 @@ static void onEndSet(gmk_KLVParser *parser) {
     parser->sodbSize = 0;
 
     for(size_t i = 0; i < parser->uasDataSetSize; i++) {
-        parser->uasDataSet[i] = (gmk_KLVElement) {};
+        parser->uasDataSet[i] = (gmk_KLVElement) {0};
     }
     parser->uasDataSetSize = 0;
 }
@@ -3191,9 +3196,11 @@ static void onError(gmk_KLVParser *parser) {
     parser->sodbSize = 0;
 }
 
-GMKKLV void gmk_klvParse(gmk_KLVParser* parser, const uint8_t* chunk, const int length, void (*onEndSetCallback)(gmk_KLVElement *, int)) {
-    
-    for(size_t i = 0; i < length; i++) {
+
+GMKKLV int gmk_klvParseResult(struct gmk_KLVParser* parser, const uint8_t* chunk, const int length, gmk_KLVElement* result, const int resultSize) {
+   int parsedCount = 0;
+
+   for(size_t i = 0; i < length; i++) {
         uint8_t byte = chunk[i];
 
         if(parser->state == START_SET_KEY) {
@@ -3265,10 +3272,27 @@ GMKKLV void gmk_klvParse(gmk_KLVParser* parser, const uint8_t* chunk, const int 
                 }
                 onElement(parser, klv);
             }
-            onEndSetCallback(parser->uasDataSet, parser->uasDataSetSize);
+
+            // Fit as many as the given result array can hold
+            parsedCount = parser->uasDataSetSize < resultSize ? parser->uasDataSetSize : resultSize;
+            
+            for(int i = 0; i < parsedCount; i++) {
+                result[i] = parser->uasDataSet[i];
+            }
             onEndSet(parser);
         }
     }
+    return parsedCount;
+}
+
+GMKKLV void gmk_klvParse(gmk_KLVParser* parser, const uint8_t* chunk, const int length, void (*onEndSetCallback)(gmk_KLVElement *, int)) {
+    struct gmk_KLVElement results[MAX_UAS_TAGS];
+    int resultsParsed = 0;
+
+    resultsParsed = gmk_klvParseResult(parser, chunk, length, results, 512);
+
+    onEndSetCallback(results, resultsParsed);
+ 
 }
 
 

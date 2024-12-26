@@ -36,8 +36,13 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.media3.common)
+            implementation(libs.androidx.media3.common.ktx)
+            implementation(libs.androidx.media3.extractor)
+            implementation(libs.androidx.media3.datasource)
         }
         commonMain.dependencies {
+            implementation(project(":klvmp"))
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
@@ -57,11 +62,6 @@ kotlin {
 android {
     namespace = "io.kusius.uashub"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
-    externalNativeBuild {
-        cmake {
-            path = file("./src/nativeInterop/cinterop/CMakeLists.txt")
-        }
-    }
 
     defaultConfig {
         applicationId = "io.kusius.uashub"

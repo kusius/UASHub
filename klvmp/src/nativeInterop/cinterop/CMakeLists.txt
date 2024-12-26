@@ -20,5 +20,5 @@ add_library( # Specifies the name of the library.
         klv-ndk-wrapper.c)
 
 target_link_libraries(
-        klv
+        klv log
 )

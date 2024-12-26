@@ -45,11 +45,9 @@ class AndroidPlatformKLVMP private constructor() : PlatformKLVMP {
     }
 
     private external fun newKLVParser(): Int
-    private external fun initNative()
 
     init {
         System.loadLibrary("klv")
-        initNative()
     }
 
     override fun createKLVParser() : AndroidKLVParser? {

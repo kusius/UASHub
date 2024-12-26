@@ -2,6 +2,7 @@
 #include "klv.h"
 #include <jni.h>
 #include <malloc.h>
+#include <android/log.h>
 
 #define MAX_PARSERS 512
 
@@ -19,8 +20,15 @@ static jobject enumLong ;
 static jobject enumUnknown ;
 static jobject enumParseError;
 
-JNIEXPORT void JNICALL
-Java_io_kusius_klvmp_AndroidPlatformKLVMP_initNative(JNIEnv *env, jobject thiz) {
+const char* TAG = "klvmp";
+
+jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+    JNIEnv *env = NULL;
+    if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_6) != JNI_OK) {
+        __android_log_print (ANDROID_LOG_ERROR, TAG, "Could not retrieve JNIEnv");
+        return 0;
+    }
+
     for(int i = 0; i < MAX_PARSERS; i++) {
        parsers[i] = (KLVParserJNI){
                .nativeParser = gmk_newKlvParser(),
@@ -51,6 +59,7 @@ Java_io_kusius_klvmp_AndroidPlatformKLVMP_initNative(JNIEnv *env, jobject thiz) 
     jfieldID enumParseErrorFID = (*env)->GetStaticFieldID(env, clValueType, "PARSE_ERROR", "Lio/kusius/klvmp/ValueType;");
     enumParseError = (*env)->GetStaticObjectField(env, clValueType, enumParseErrorFID);
 
+    return JNI_VERSION_1_6;
 }
 
 JNIEXPORT jint JNICALL
@@ -69,10 +78,6 @@ Java_io_kusius_klvmp_AndroidPlatformKLVMP_newKLVParser(JNIEnv *env, jobject obj)
 
     parsers[index].isClosed = 0;
     return (jint) index;
-}
-
-static inline void onEndSetCallback(int size) {
-    int a = size + 1;
 }
 
 jobject mapValueType(enum gmk_KLVValueType nativeType) {

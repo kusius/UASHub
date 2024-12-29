@@ -19,6 +19,14 @@ add_library( # Specifies the name of the library.
         # Provides a relative path to your source file(s).
         klv-ndk-wrapper.c)
 
-target_link_libraries(
-        klv log
+add_library(
+        tsdemux
+
+        SHARED
+
+        tsdemux/tsdemux-ndk-wrapper.cpp tsdemux/tsdemux.c
 )
+
+target_link_libraries(klv log)
+
+target_link_libraries(tsdemux log)

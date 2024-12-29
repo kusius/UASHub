@@ -1,28 +1,28 @@
 package io.kusius.klvmp
 
-data class KLVElement(
-    val key: Int,
-    val length: Int,
-    val valueType: ValueType,
-    private val valueBytes: ByteArray
-)
+import android.util.Log
+import io.kusius.klvmp.AndroidPlatformKLVMP.Companion.TAG
 
-class AndroidKLVParser(private val nativeHandle: Int) : KLVParser {
-    private external fun parseKLV(nativeHandle: Int, bytes: ByteArray, length: Int,
-                                  result: Array<KLVElement>, resultSize: Int)
+internal class AndroidKLVParser(private val nativeHandle: Int) : KLVParser {
+    private external fun parseKLV(nativeHandle: Int, bytes: ByteArray,
+                                  result: Array<KLVElement>,
+                                  resultSize: Int) : Int
     private external fun disposeParser(nativeHandle: Int)
 
     init {
         println("Allocated parser ${this.nativeHandle}")
     }
 
-    override fun parseKLVBytes(bytes: ByteArray) {
+    override fun parseKLVBytes(bytes: ByteArray) : List<KLVElement> {
+        // Allocate some memory for the native function to write the results if any
         val resultSize = 512
         val result = Array(resultSize) {
             KLVElement(0,0,ValueType.UNKNOWN, byteArrayOf())
         }
 
-        parseKLV(nativeHandle, bytes, bytes.size, result, resultSize)
+        val parsedCount = parseKLV(nativeHandle, bytes, result, resultSize)
+
+        return if(parsedCount > 0) result.take(parsedCount) else emptyList()
     }
 
     override fun close() {
@@ -31,7 +31,37 @@ class AndroidKLVParser(private val nativeHandle: Int) : KLVParser {
 
 }
 
-class AndroidPlatformKLVMP private constructor() : PlatformKLVMP {
+internal class AndroidTsKLVDemuxer(private val nativeHandle: Int)  : TsKLVDemuxer{
+    private external fun disposeDemuxer(nativeHandle: Int)
+    private external fun demuxKLVNative(nativeHandle: Int, streamData: ByteArray)
+    private external fun registerCallback(nativeHandle: Int)
+
+    private var onKLVBytesListener: OnKLVBytesListener? = null
+
+
+    init {
+        registerCallback(nativeHandle)
+    }
+
+    override fun demuxKLV(streamData: ByteArray): ByteArray {
+        demuxKLVNative(nativeHandle, streamData)
+        return byteArrayOf()
+    }
+
+    override fun setOnKLVBytesListener(onKLVBytesListener: OnKLVBytesListener) {
+        this.onKLVBytesListener = onKLVBytesListener
+    }
+
+    fun onKLVBytesReceived(data: ByteArray) {
+        Log.d(TAG, "Received ${data.size} from Ts Demuxer")
+        onKLVBytesListener?.onKLVBytesReceivedCallback(data)
+    }
+    override fun close() {
+        disposeDemuxer(nativeHandle)
+    }
+}
+
+internal class AndroidPlatformKLVMP private constructor() : PlatformKLVMP {
     companion object {
         const val TAG = "AndroidPlatformKLVMP"
 
@@ -45,9 +75,11 @@ class AndroidPlatformKLVMP private constructor() : PlatformKLVMP {
     }
 
     private external fun newKLVParser(): Int
+    private external fun newTsDemuxer(): Int
 
     init {
         System.loadLibrary("klv")
+        System.loadLibrary("tsdemux")
     }
 
     override fun createKLVParser() : AndroidKLVParser? {
@@ -55,6 +87,14 @@ class AndroidPlatformKLVMP private constructor() : PlatformKLVMP {
 
         return if(nativeHandle >= 0) {
             AndroidKLVParser(nativeHandle = nativeHandle)
+        } else null
+    }
+
+    override fun createTsDemuxer(): TsKLVDemuxer? {
+        val nativeHandle = newTsDemuxer()
+
+        return if(nativeHandle >= 0) {
+            AndroidTsKLVDemuxer(nativeHandle = nativeHandle)
         } else null
     }
 

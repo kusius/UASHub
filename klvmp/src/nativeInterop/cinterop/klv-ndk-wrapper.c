@@ -12,21 +12,21 @@ typedef struct KLVParserJNI {
 } KLVParserJNI;
 
 static KLVParserJNI parsers[MAX_PARSERS];
-static jobject enumString;
-static jobject enumInt ;
-static jobject enumFloat;
-static jobject enumDouble ;
-static jobject enumLong ;
-static jobject enumUnknown ;
-static jobject enumParseError;
+static jfieldID enumStringFID;
+static jfieldID enumIntFID ;
+static jfieldID enumFloatFID;
+static jfieldID enumDoubleFID;
+static jfieldID enumLongFID ;
+static jfieldID enumUnknownFID;
+static jfieldID enumParseErrorFID;
 
 const char* TAG = "klvmp";
 
-jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     JNIEnv *env = NULL;
     if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_6) != JNI_OK) {
         __android_log_print (ANDROID_LOG_ERROR, TAG, "Could not retrieve JNIEnv");
-        return 0;
+        return JNI_ERR;
     }
 
     for(int i = 0; i < MAX_PARSERS; i++) {
@@ -38,26 +38,19 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 
     // Map the JNI value type enum fields for later use when converting native enum to JNI enum
     jclass clValueType = (*env)->FindClass(env, "io/kusius/klvmp/ValueType");
-    jfieldID enumStringFID = (*env)->GetStaticFieldID(env, clValueType, "STRING", "Lio/kusius/klvmp/ValueType;");
-    enumString = (*env)->GetStaticObjectField(env, clValueType, enumStringFID);
+     enumStringFID = (*env)->GetStaticFieldID(env, clValueType, "STRING", "Lio/kusius/klvmp/ValueType;");
 
-    jfieldID enumIntFID = (*env)->GetStaticFieldID(env, clValueType, "INT", "Lio/kusius/klvmp/ValueType;");
-    enumInt = (*env)->GetStaticObjectField(env, clValueType, enumIntFID);
+     enumIntFID = (*env)->GetStaticFieldID(env, clValueType, "INT", "Lio/kusius/klvmp/ValueType;");
 
-    jfieldID enumFloatFID = (*env)->GetStaticFieldID(env, clValueType, "FLOAT", "Lio/kusius/klvmp/ValueType;");
-    enumFloat = (*env)->GetStaticObjectField(env, clValueType, enumFloatFID);
+     enumFloatFID = (*env)->GetStaticFieldID(env, clValueType, "FLOAT", "Lio/kusius/klvmp/ValueType;");
 
-    jfieldID enumDoubleFID = (*env)->GetStaticFieldID(env, clValueType, "DOUBLE", "Lio/kusius/klvmp/ValueType;");
-    enumDouble = (*env)->GetStaticObjectField(env, clValueType, enumDoubleFID);
+     enumDoubleFID = (*env)->GetStaticFieldID(env, clValueType, "DOUBLE", "Lio/kusius/klvmp/ValueType;");
 
-    jfieldID enumLongFID = (*env)->GetStaticFieldID(env, clValueType, "LONG", "Lio/kusius/klvmp/ValueType;");
-    enumLong = (*env)->GetStaticObjectField(env, clValueType, enumLongFID);
+     enumLongFID = (*env)->GetStaticFieldID(env, clValueType, "LONG", "Lio/kusius/klvmp/ValueType;");
 
-    jfieldID enumUnknownFID = (*env)->GetStaticFieldID(env, clValueType, "UNKNOWN", "Lio/kusius/klvmp/ValueType;");
-    enumUnknown = (*env)->GetStaticObjectField(env, clValueType, enumUnknownFID);
+     enumUnknownFID = (*env)->GetStaticFieldID(env, clValueType, "UNKNOWN", "Lio/kusius/klvmp/ValueType;");
 
-    jfieldID enumParseErrorFID = (*env)->GetStaticFieldID(env, clValueType, "PARSE_ERROR", "Lio/kusius/klvmp/ValueType;");
-    enumParseError = (*env)->GetStaticObjectField(env, clValueType, enumParseErrorFID);
+     enumParseErrorFID = (*env)->GetStaticFieldID(env, clValueType, "PARSE_ERROR", "Lio/kusius/klvmp/ValueType;");
 
     return JNI_VERSION_1_6;
 }
@@ -80,44 +73,47 @@ Java_io_kusius_klvmp_AndroidPlatformKLVMP_newKLVParser(JNIEnv *env, jobject obj)
     return (jint) index;
 }
 
-jobject mapValueType(enum gmk_KLVValueType nativeType) {
+jfieldID mapValueType(enum gmk_KLVValueType nativeType) {
     switch (nativeType) {
         case GMK_KLV_VALUE_DOUBLE:
-            return enumDouble;
+            return enumDoubleFID;
             break;
         case GMK_KLV_VALUE_FLOAT:
-            return enumFloat;
+            return enumFloatFID;
             break;
         case GMK_KLV_VALUE_INT:
-            return enumInt;
+            return enumIntFID;
             break;
         case GMK_KLV_VALUE_STRING:
-            return enumString;
+            return enumStringFID;
             break;
         case GMK_KLV_VALUE_UINT64:
-            return enumLong;
+            return enumLongFID;
             break;
         case GMK_KLV_VALUE_UNKNOWN:
-            return enumUnknown;
+            return enumUnknownFID;
             break;
         case GMK_KLV_VALUE_PARSE_ERROR:
-            return enumParseError;
+            return enumParseErrorFID;
             break;
         default:
-            return enumUnknown;
+            return enumUnknownFID;
             break;
     }
 }
 
-JNIEXPORT void JNICALL
+JNIEXPORT jint JNICALL
 Java_io_kusius_klvmp_AndroidKLVParser_parseKLV(JNIEnv *env, jobject obj,
                                                jint index,
                                                jbyteArray bytes,
-                                               jint length,
                                                jobjectArray result,
                                                jint resultSize) {
+    int arrayLength = (*env)->GetArrayLength(env, bytes);
+    jboolean isCopy = -1;
+    jbyte* b = (*env)->GetByteArrayElements(env, bytes, &isCopy);
+
     struct gmk_KLVElement nativeResult[512] = {0};
-    int parsedCount = gmk_klvParseResult(&(parsers[index].nativeParser), bytes, length, nativeResult, 512);
+    int parsedCount = gmk_klvParseResult(&(parsers[index].nativeParser), b, arrayLength, nativeResult, 512);
 
     // Transfer results into Java array, taking care not to overflow given result array
     parsedCount = parsedCount < resultSize ? parsedCount : resultSize;
@@ -136,14 +132,23 @@ Java_io_kusius_klvmp_AndroidKLVParser_parseKLV(JNIEnv *env, jobject obj,
         (*env)->SetIntField(env, klv, fieldId, nativeKlv.length);
 
         // ValueType (enum)
-        jobject enumType = mapValueType(nativeKlv.valueType);
+        jclass clValueType = (*env)->FindClass(env, "io/kusius/klvmp/ValueType");
+        jfieldID enumTypeFID = mapValueType(nativeKlv.valueType);
+        jobject enumType = (*env)->GetStaticObjectField(env, clValueType, enumTypeFID);
+
         fieldId = (*env)->GetFieldID(env, klElementClass, "valueType", "Lio/kusius/klvmp/ValueType;");
         (*env)->SetObjectField(env, klv, fieldId, enumType);
 
         // Value
         // TODO: Figure out how to set based on ValueType
-
+        fieldId = (*env)->GetFieldID(env, klElementClass, "valueBytes", "[B");
+        jbyteArray byteArrayField = (*env)->GetObjectField(env, klv, fieldId);
+        byteArrayField = (*env)->NewByteArray(env, nativeKlv.length);
+        (*env)->SetByteArrayRegion(env, byteArrayField, 0, nativeKlv.length, (jbyte*)nativeKlv.value);
+        (*env)->SetObjectField(env, klv, fieldId, byteArrayField);
     }
+
+    return (jint) parsedCount;
 }
 
 JNIEXPORT void JNICALL

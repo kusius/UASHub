@@ -13,16 +13,18 @@ internal class AndroidKLVParser(private val nativeHandle: Int) : KLVParser {
         println("Allocated parser ${this.nativeHandle}")
     }
 
-    override fun parseKLVBytes(bytes: ByteArray) : List<KLVElement> {
+    override fun parseKLVBytes(bytes: ByteArray) : UASDataset {
         // Allocate some memory for the native function to write the results if any
         val resultSize = 512
         val result = Array(resultSize) {
-            KLVElement(0,0,ValueType.UNKNOWN, byteArrayOf())
+            KLVElement(0,0,ValueType.UNKNOWN, byteArrayOf(), UnknownValue)
         }
 
         val parsedCount = parseKLV(nativeHandle, bytes, result, resultSize)
 
-        return if(parsedCount > 0) result.take(parsedCount) else emptyList()
+        val elements = if(parsedCount > 0) result.take(parsedCount) else emptyList()
+
+        return UASDataset.fromKLVSet(elements)
     }
 
     override fun close() {

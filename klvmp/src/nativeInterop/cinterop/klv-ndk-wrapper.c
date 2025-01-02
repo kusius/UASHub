@@ -21,6 +21,7 @@ static jfieldID enumUnknownFID;
 static jfieldID enumParseErrorFID;
 
 const char* TAG = "klvmp";
+void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj);
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     JNIEnv *env = NULL;
@@ -146,9 +147,110 @@ Java_io_kusius_klvmp_AndroidKLVParser_parseKLV(JNIEnv *env, jobject obj,
         byteArrayField = (*env)->NewByteArray(env, nativeKlv.length);
         (*env)->SetByteArrayRegion(env, byteArrayField, 0, nativeKlv.length, (jbyte*)nativeKlv.value);
         (*env)->SetObjectField(env, klv, fieldId, byteArrayField);
+        setValue(env, &nativeKlv, klElementClass, klv);
     }
 
     return (jint) parsedCount;
+}
+
+void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj) {
+    jfieldID fieldId = (*env)->GetFieldID(env, class, "value", "Lio/kusius/klvmp/KLVValue;");
+    // based on value type, we allocate a new object of the type KLVValue (sealed class), set its value
+    // and set it on the object
+
+    switch (nativeKLV->valueType) {
+
+        case GMK_KLV_VALUE_STRING:
+        {
+            jclass klvValueClass = (*env)->FindClass(env, "io/kusius/klvmp/StringValue");
+            jmethodID constructor = (*env)->GetMethodID(env, klvValueClass, "<init>",
+                                                        "(Ljava/lang/String;)V");
+            jstring javaValue = (*env)->NewStringUTF(env, (const char *) nativeKLV->value);
+            jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor, javaValue);
+
+            jfieldID valueFID = (*env)->GetFieldID(env, class, "value",
+                                                   "Lio/kusius/klvmp/KLVValue;");
+            (*env)->SetObjectField(env, obj, valueFID, klvValueObj);
+        }
+            break;
+        case GMK_KLV_VALUE_INT:
+        {
+            jclass klvValueClass = (*env)->FindClass(env, "io/kusius/klvmp/IntValue");
+            jmethodID constructor = (*env)->GetMethodID(env, klvValueClass, "<init>",
+                                                        "(I)V");
+            jint javaValue = nativeKLV->intValue;
+            jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor, javaValue);
+
+            jfieldID valueFID = (*env)->GetFieldID(env, class, "value",
+                                                   "Lio/kusius/klvmp/KLVValue;");
+            (*env)->SetObjectField(env, obj, valueFID, klvValueObj);
+        }
+            break;
+        case GMK_KLV_VALUE_FLOAT:
+        {
+            jclass klvValueClass = (*env)->FindClass(env, "io/kusius/klvmp/FloatValue");
+            jmethodID constructor = (*env)->GetMethodID(env, klvValueClass, "<init>",
+                                                        "(F)V");
+            jfloat javaValue = nativeKLV->floatValue;
+            jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor, javaValue);
+
+            jfieldID valueFID = (*env)->GetFieldID(env, class, "value",
+                                                   "Lio/kusius/klvmp/KLVValue;");
+            (*env)->SetObjectField(env, obj, valueFID, klvValueObj);
+        }
+            break;
+        case GMK_KLV_VALUE_DOUBLE:
+        {
+            jclass klvValueClass = (*env)->FindClass(env, "io/kusius/klvmp/DoubleValue");
+            jmethodID constructor = (*env)->GetMethodID(env, klvValueClass, "<init>",
+                                                        "(D)V");
+            jdouble javaValue = nativeKLV->doubleValue;
+            jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor, javaValue);
+
+            jfieldID valueFID = (*env)->GetFieldID(env, class, "value",
+                                                   "Lio/kusius/klvmp/KLVValue;");
+            (*env)->SetObjectField(env, obj, valueFID, klvValueObj);
+        }
+            break;
+        case GMK_KLV_VALUE_UINT64:
+        {
+            jclass klvValueClass = (*env)->FindClass(env, "io/kusius/klvmp/LongValue");
+            jmethodID constructor = (*env)->GetMethodID(env, klvValueClass, "<init>",
+                                                        "(J)V");
+            jlong javaValue = (jlong)nativeKLV->uint64Value;
+            jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor, javaValue);
+
+            jfieldID valueFID = (*env)->GetFieldID(env, class, "value",
+                                                   "Lio/kusius/klvmp/KLVValue;");
+            (*env)->SetObjectField(env, obj, valueFID, klvValueObj);
+        }
+            break;
+        case GMK_KLV_VALUE_UNKNOWN:
+        {
+            jclass klvValueClass = (*env)->FindClass(env, "io/kusius/klvmp/UnknownValue");
+            jmethodID constructor = (*env)->GetMethodID(env, klvValueClass, "<init>",
+                                                        "()V");
+            jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor);
+
+            jfieldID valueFID = (*env)->GetFieldID(env, class, "value",
+                                                   "Lio/kusius/klvmp/KLVValue;");
+            (*env)->SetObjectField(env, obj, valueFID, klvValueObj);
+        }
+            break;
+        case GMK_KLV_VALUE_PARSE_ERROR:
+        {
+            jclass klvValueClass = (*env)->FindClass(env, "io/kusius/klvmp/ParseErrorValue");
+            jmethodID constructor = (*env)->GetMethodID(env, klvValueClass, "<init>",
+                                                        "()V");
+            jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor);
+
+            jfieldID valueFID = (*env)->GetFieldID(env, class, "value",
+                                                   "Lio/kusius/klvmp/KLVValue;");
+            (*env)->SetObjectField(env, obj, valueFID, klvValueObj);
+        }
+            break;
+    }
+
 }
 
 JNIEXPORT void JNICALL

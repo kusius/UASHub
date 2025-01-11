@@ -1,8 +1,6 @@
 #define GMK_KLV_IMPLEMENTATION
 #include "klv.h"
 #include <jni.h>
-#include <malloc.h>
-#include <android/log.h>
 
 #define MAX_PARSERS 512
 
@@ -26,7 +24,6 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     JNIEnv *env = NULL;
     if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_6) != JNI_OK) {
-        __android_log_print (ANDROID_LOG_ERROR, TAG, "Could not retrieve JNIEnv");
         return JNI_ERR;
     }
 
@@ -57,7 +54,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 }
 
 JNIEXPORT jint JNICALL
-Java_io_kusius_klvmp_AndroidPlatformKLVMP_newKLVParser(JNIEnv *env, jobject obj) {
+Java_io_kusius_klvmp_JVMPlatformKLVMP_newKLVParser(JNIEnv *env, jobject obj) {
     // Find an available slot in the parsers list
     int index = 0;
     while(index < MAX_PARSERS) {
@@ -104,7 +101,7 @@ jfieldID mapValueType(enum gmk_KLVValueType nativeType) {
 }
 
 JNIEXPORT jint JNICALL
-Java_io_kusius_klvmp_AndroidKLVParser_parseKLV(JNIEnv *env, jobject obj,
+Java_io_kusius_klvmp_JVMKLVParser_parseKLV(JNIEnv *env, jobject obj,
                                                jint index,
                                                jbyteArray bytes,
                                                jobjectArray result,
@@ -254,7 +251,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
 }
 
 JNIEXPORT void JNICALL
-Java_io_kusius_klvmp_AndroidKLVParser_disposeParser(JNIEnv *env, jobject thiz,
+Java_io_kusius_klvmp_JVMKLVParser_disposeParser(JNIEnv *env, jobject thiz,
                                                     jint native_handle) {
 
     parsers[native_handle] = (KLVParserJNI) {
@@ -262,4 +259,9 @@ Java_io_kusius_klvmp_AndroidKLVParser_disposeParser(JNIEnv *env, jobject thiz,
         .nativeParser = gmk_newKlvParser()
     };
 
+}
+
+JNIEXPORT jint JNICALL
+Java_io_kusius_klvmp_Platform_1jvmKt_nativeFunction(JNIEnv *env, jclass clazz, jint a) {
+    return 42 + a;
 }

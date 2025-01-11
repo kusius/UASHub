@@ -1,6 +1,5 @@
 #include "tsdemux.h"
 #include <jni.h>
-#include <android/log.h>
 
 #define MAX_DEMUXERS 512
 
@@ -22,7 +21,6 @@ static JavaVM* javaVm;
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     JNIEnv *env = nullptr;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
-        __android_log_print (ANDROID_LOG_ERROR, TAG, "Could not retrieve JNIEnv");
         return JNI_ERR;
     }
 
@@ -40,7 +38,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_io_kusius_klvmp_AndroidPlatformKLVMP_newTsDemuxer(JNIEnv *env, jobject thiz) {
+Java_io_kusius_klvmp_JVMPlatformKLVMP_newTsDemuxer(JNIEnv *env, jobject thiz) {
     int index = 0;
     while(index < MAX_DEMUXERS) {
         if(demuxers[index].isClosed) {
@@ -61,7 +59,7 @@ Java_io_kusius_klvmp_AndroidPlatformKLVMP_newTsDemuxer(JNIEnv *env, jobject thiz
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_io_kusius_klvmp_AndroidTsKLVDemuxer_demuxKLVNative(JNIEnv *env, jobject thiz,
+Java_io_kusius_klvmp_JVMTsKLVDemuxer_demuxKLVNative(JNIEnv *env, jobject thiz,
                                                         jint native_handle,
                                                         jbyteArray stream_data) {
     if(native_handle < 0 || native_handle >= MAX_DEMUXERS) return;
@@ -95,9 +93,8 @@ static void event_cb(TSDemuxContext *ctx, uint16_t pid, TSDEventId event_id, voi
 
     if(index >= 0 && index < MAX_DEMUXERS) {
         if(event_id == TSD_EVENT_PAT) {
-//            __android_log_print(ANDROID_LOG_INFO, TAG, "PAT event");
+            // do nothing
         } else if(event_id == TSD_EVENT_PMT) {
-//            __android_log_print(ANDROID_LOG_INFO, TAG, "PMT event");
             auto *pmt = (TSDPMTData*)data;
             size_t i;
 
@@ -109,6 +106,7 @@ static void event_cb(TSDemuxContext *ctx, uint16_t pid, TSDEventId event_id, voi
                     if(des->tag == 0x05) { // registration descriptor
                         TSDDescriptorRegistration res;
                         if(TSD_OK == tsd_parse_descriptor_registration(des->data, des->data_length, &res)) {
+                            // we register for PES packets only for KLVA format identifier
                             if(res.format_identifier == 0x4B4C5641) { // KLVA
                                 tsd_register_pid(ctx, prog->elementary_pid, TSD_REG_PES);
                             }
@@ -118,7 +116,6 @@ static void event_cb(TSDemuxContext *ctx, uint16_t pid, TSDEventId event_id, voi
             }
         } else if(event_id == TSD_EVENT_PES) {
             auto *pes = (TSDPESPacket*) data;
-            __android_log_print(ANDROID_LOG_INFO, TAG, "PES packet of size %d", pes->data_bytes_length);
             // Data from our registered KLV stream was received. Pass it to Java callback
             jbyteArray bytes = demuxer->env->NewByteArray((int)pes->data_bytes_length);
             demuxer->env->SetByteArrayRegion(bytes, 0, (int)pes->data_bytes_length,
@@ -130,18 +127,17 @@ static void event_cb(TSDemuxContext *ctx, uint16_t pid, TSDEventId event_id, voi
 
                 if(demuxer->env->ExceptionOccurred()) {
                     demuxer->env->ExceptionDescribe();
-                    __android_log_print(ANDROID_LOG_ERROR, TAG, "Exception occured when trying to callback");
                 }
             }
         } else {
-            __android_log_print(ANDROID_LOG_INFO, TAG, "OTHER event");
+            // unkown packet type. Do nothing
         }
     }
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_io_kusius_klvmp_AndroidTsKLVDemuxer_disposeDemuxer(JNIEnv *env, jobject thiz,
+Java_io_kusius_klvmp_JVMTsKLVDemuxer_disposeDemuxer(JNIEnv *env, jobject thiz,
                                                         jint native_handle) {
     TsDemuxerJNI* demuxer = &demuxers[native_handle];
     TSDemuxContext *context = &demuxer->context;
@@ -158,17 +154,26 @@ Java_io_kusius_klvmp_AndroidTsKLVDemuxer_disposeDemuxer(JNIEnv *env, jobject thi
             .isClosed = 1
     };
 
-    javaVm->DetachCurrentThread();
+    // we detach and clear global reference because we attached in registerCallback function
+//    javaVm->DetachCurrentThread();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_io_kusius_klvmp_AndroidTsKLVDemuxer_registerCallback(JNIEnv *env, jobject thiz,
+Java_io_kusius_klvmp_JVMTsKLVDemuxer_registerCallback(JNIEnv *env, jobject thiz,
                                                           jint native_handle) {
     // get our parser
     if(native_handle < 0 || native_handle >= MAX_DEMUXERS) return;
 
-    javaVm->AttachCurrentThread(&env, nullptr);
+    // Slight differentiation of JNI interface for "AttachCurrentThread" between
+    // android and rest of JNI platforms.
+
+    // seems like this is not needed
+//#if __ANDROID__
+//    javaVm->AttachCurrentThread(&env, nullptr);
+//#else
+//    javaVm->AttachCurrentThread((void**)&env, nullptr);
+//#endif
 
     TsDemuxerJNI* demuxer = &demuxers[native_handle];
     demuxer->env = env;

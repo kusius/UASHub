@@ -30,10 +30,11 @@ class MainActivity : ComponentActivity() {
                 val dataSource = DefaultHttpDataSource.Factory().createDataSource()
                 dataSource.open(DataSpec(uri))
 
-                val demuxer = getPlatformKLVMP().createTsDemuxer()
+                val demuxer = getPlatformKLVMP().createTsDemuxer() ?: return@withContext
+                val klvParser = getPlatformKLVMP().createKLVParser() ?: return@withContext
+
                 demuxer?.setOnKLVBytesListener(
                     object : OnKLVBytesListener {
-                        private val klvParser = getPlatformKLVMP().createKLVParser()
                         override fun onKLVBytesReceivedCallback(bytes: ByteArray) {
                             val uasDataset = klvParser?.parseKLVBytes(bytes)
                             Log.d("MainActivity", "$uasDataset")
@@ -49,12 +50,13 @@ class MainActivity : ComponentActivity() {
                         break;
                     } else {
                         totalBytesRead += read
-                        demuxer?.demuxKLV(bytes)
+                        demuxer.demuxKLV(bytes)
                     }
                 }
 
                 Log.d("MainActivity", "Total Bytes read $totalBytesRead")
-
+                demuxer.close()
+                klvParser.close()
             }
         }
 

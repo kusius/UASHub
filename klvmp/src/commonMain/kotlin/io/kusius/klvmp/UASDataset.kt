@@ -5,6 +5,8 @@ package io.kusius.klvmp
  * in a STANAG 4609 MPEG-TS stream.
  *
  * The dataset described is according to MISB 0601.
+ * Some composite fields are missing. Once klv.h library
+ * is updated we will wrap them here as well to be exposed.
  */
 data class UASDataset(
     val checkSum: Int?,

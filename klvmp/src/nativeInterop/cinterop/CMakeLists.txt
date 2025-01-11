@@ -3,6 +3,11 @@
 # your build.
 
 cmake_minimum_required(VERSION 3.4.1)
+project(klvmp)
+
+find_package(JNI REQUIRED)
+
+include_directories(${JNI_INCLUDE_DIRS})
 
 # Specifies a library name, specifies whether the library is STATIC or
 # SHARED, and provides relative paths to the source code. You can
@@ -27,6 +32,6 @@ add_library(
         tsdemux/tsdemux-ndk-wrapper.cpp tsdemux/tsdemux.c
 )
 
-target_link_libraries(klv log)
+target_link_libraries(klv)
 
-target_link_libraries(tsdemux log)
+target_link_libraries(tsdemux)

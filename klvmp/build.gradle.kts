@@ -134,7 +134,7 @@ mavenPublishing {
     coordinates(group.toString(), "klvmp", version.toString())
 
     pom {
-        name = "KLV Multiplatform"
+        name = "KLV Multiplatform Library"
         description = "A library for parsing KLV metadata for UAS dataset (MISB 0601)"
         inceptionYear = "2024"
         url = "https://github.com/kusius/UASHUB"
@@ -147,15 +147,15 @@ mavenPublishing {
         }
         developers {
             developer {
-                id = "gmk"
-                name = "Kusius"
+                id = "kusius"
+                name = "George Kousis"
                 url = "https://kusius.github.io"
             }
         }
         scm {
-            url = "XXX"
-            connection = "YYY"
-            developerConnection = "ZZZ"
+            url = "https://github.com/kusius/UASHUB"
+            connection = "scm:git:git://github.com/kusius/UASHUB.git"
+            developerConnection = "scm:git:ssh://github.com:kusius/UASHUB.git"
         }
     }
 }

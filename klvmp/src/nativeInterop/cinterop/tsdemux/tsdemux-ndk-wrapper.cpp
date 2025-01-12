@@ -38,7 +38,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_io_kusius_klvmp_JVMPlatformKLVMP_newTsDemuxer(JNIEnv *env, jobject thiz) {
+Java_io_github_kusius_klvmp_JVMPlatformKLVMP_newTsDemuxer(JNIEnv *env, jobject thiz) {
     int index = 0;
     while(index < MAX_DEMUXERS) {
         if(demuxers[index].isClosed) {
@@ -59,7 +59,7 @@ Java_io_kusius_klvmp_JVMPlatformKLVMP_newTsDemuxer(JNIEnv *env, jobject thiz) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_io_kusius_klvmp_JVMTsKLVDemuxer_demuxKLVNative(JNIEnv *env, jobject thiz,
+Java_io_github_kusius_klvmp_JVMTsKLVDemuxer_demuxKLVNative(JNIEnv *env, jobject thiz,
                                                         jint native_handle,
                                                         jbyteArray stream_data) {
     if(native_handle < 0 || native_handle >= MAX_DEMUXERS) return;
@@ -137,7 +137,7 @@ static void event_cb(TSDemuxContext *ctx, uint16_t pid, TSDEventId event_id, voi
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_io_kusius_klvmp_JVMTsKLVDemuxer_disposeDemuxer(JNIEnv *env, jobject thiz,
+Java_io_github_kusius_klvmp_JVMTsKLVDemuxer_disposeDemuxer(JNIEnv *env, jobject thiz,
                                                         jint native_handle) {
     TsDemuxerJNI* demuxer = &demuxers[native_handle];
     TSDemuxContext *context = &demuxer->context;
@@ -160,7 +160,7 @@ Java_io_kusius_klvmp_JVMTsKLVDemuxer_disposeDemuxer(JNIEnv *env, jobject thiz,
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_io_kusius_klvmp_JVMTsKLVDemuxer_registerCallback(JNIEnv *env, jobject thiz,
+Java_io_github_kusius_klvmp_JVMTsKLVDemuxer_registerCallback(JNIEnv *env, jobject thiz,
                                                           jint native_handle) {
     // get our parser
     if(native_handle < 0 || native_handle >= MAX_DEMUXERS) return;

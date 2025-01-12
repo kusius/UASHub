@@ -35,26 +35,26 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     }
 
     // Map the JNI value type enum fields for later use when converting native enum to JNI enum
-    jclass clValueType = (*env)->FindClass(env, "io/kusius/klvmp/ValueType");
-     enumStringFID = (*env)->GetStaticFieldID(env, clValueType, "STRING", "Lio/kusius/klvmp/ValueType;");
+    jclass clValueType = (*env)->FindClass(env, "io/github/kusius/klvmp/ValueType");
+     enumStringFID = (*env)->GetStaticFieldID(env, clValueType, "STRING", "Lio/github/kusius/klvmp/ValueType;");
 
-     enumIntFID = (*env)->GetStaticFieldID(env, clValueType, "INT", "Lio/kusius/klvmp/ValueType;");
+     enumIntFID = (*env)->GetStaticFieldID(env, clValueType, "INT", "Lio/github/kusius/klvmp/ValueType;");
 
-     enumFloatFID = (*env)->GetStaticFieldID(env, clValueType, "FLOAT", "Lio/kusius/klvmp/ValueType;");
+     enumFloatFID = (*env)->GetStaticFieldID(env, clValueType, "FLOAT", "Lio/github/kusius/klvmp/ValueType;");
 
-     enumDoubleFID = (*env)->GetStaticFieldID(env, clValueType, "DOUBLE", "Lio/kusius/klvmp/ValueType;");
+     enumDoubleFID = (*env)->GetStaticFieldID(env, clValueType, "DOUBLE", "Lio/github/kusius/klvmp/ValueType;");
 
-     enumLongFID = (*env)->GetStaticFieldID(env, clValueType, "LONG", "Lio/kusius/klvmp/ValueType;");
+     enumLongFID = (*env)->GetStaticFieldID(env, clValueType, "LONG", "Lio/github/kusius/klvmp/ValueType;");
 
-     enumUnknownFID = (*env)->GetStaticFieldID(env, clValueType, "UNKNOWN", "Lio/kusius/klvmp/ValueType;");
+     enumUnknownFID = (*env)->GetStaticFieldID(env, clValueType, "UNKNOWN", "Lio/github/kusius/klvmp/ValueType;");
 
-     enumParseErrorFID = (*env)->GetStaticFieldID(env, clValueType, "PARSE_ERROR", "Lio/kusius/klvmp/ValueType;");
+     enumParseErrorFID = (*env)->GetStaticFieldID(env, clValueType, "PARSE_ERROR", "Lio/github/kusius/klvmp/ValueType;");
 
     return JNI_VERSION_1_6;
 }
 
 JNIEXPORT jint JNICALL
-Java_io_kusius_klvmp_JVMPlatformKLVMP_newKLVParser(JNIEnv *env, jobject obj) {
+Java_io_github_kusius_klvmp_JVMPlatformKLVMP_newKLVParser(JNIEnv *env, jobject obj) {
     // Find an available slot in the parsers list
     int index = 0;
     while(index < MAX_PARSERS) {
@@ -101,7 +101,7 @@ jfieldID mapValueType(enum gmk_KLVValueType nativeType) {
 }
 
 JNIEXPORT jint JNICALL
-Java_io_kusius_klvmp_JVMKLVParser_parseKLV(JNIEnv *env, jobject obj,
+Java_io_github_kusius_klvmp_JVMKLVParser_parseKLV(JNIEnv *env, jobject obj,
                                                jint index,
                                                jbyteArray bytes,
                                                jobjectArray result,
@@ -130,7 +130,7 @@ Java_io_kusius_klvmp_JVMKLVParser_parseKLV(JNIEnv *env, jobject obj,
         (*env)->SetIntField(env, klv, fieldId, nativeKlv.length);
 
         // ValueType (enum)
-        jclass clValueType = (*env)->FindClass(env, "io/kusius/klvmp/ValueType");
+        jclass clValueType = (*env)->FindClass(env, "io/github/kusius/klvmp/ValueType");
         jfieldID enumTypeFID = mapValueType(nativeKlv.valueType);
         jobject enumType = (*env)->GetStaticObjectField(env, clValueType, enumTypeFID);
 
@@ -159,7 +159,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
 
         case GMK_KLV_VALUE_STRING:
         {
-            jclass klvValueClass = (*env)->FindClass(env, "io/kusius/klvmp/StringValue");
+            jclass klvValueClass = (*env)->FindClass(env, "io/github/kusius/klvmp/StringValue");
             jmethodID constructor = (*env)->GetMethodID(env, klvValueClass, "<init>",
                                                         "(Ljava/lang/String;)V");
             jstring javaValue = (*env)->NewStringUTF(env, (const char *) nativeKLV->value);
@@ -172,7 +172,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
             break;
         case GMK_KLV_VALUE_INT:
         {
-            jclass klvValueClass = (*env)->FindClass(env, "io/kusius/klvmp/IntValue");
+            jclass klvValueClass = (*env)->FindClass(env, "io/github/kusius/klvmp/IntValue");
             jmethodID constructor = (*env)->GetMethodID(env, klvValueClass, "<init>",
                                                         "(I)V");
             jint javaValue = nativeKLV->intValue;
@@ -185,7 +185,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
             break;
         case GMK_KLV_VALUE_FLOAT:
         {
-            jclass klvValueClass = (*env)->FindClass(env, "io/kusius/klvmp/FloatValue");
+            jclass klvValueClass = (*env)->FindClass(env, "io/github/kusius/klvmp/FloatValue");
             jmethodID constructor = (*env)->GetMethodID(env, klvValueClass, "<init>",
                                                         "(F)V");
             jfloat javaValue = nativeKLV->floatValue;
@@ -198,7 +198,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
             break;
         case GMK_KLV_VALUE_DOUBLE:
         {
-            jclass klvValueClass = (*env)->FindClass(env, "io/kusius/klvmp/DoubleValue");
+            jclass klvValueClass = (*env)->FindClass(env, "io/github/kusius/klvmp/DoubleValue");
             jmethodID constructor = (*env)->GetMethodID(env, klvValueClass, "<init>",
                                                         "(D)V");
             jdouble javaValue = nativeKLV->doubleValue;
@@ -211,7 +211,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
             break;
         case GMK_KLV_VALUE_UINT64:
         {
-            jclass klvValueClass = (*env)->FindClass(env, "io/kusius/klvmp/LongValue");
+            jclass klvValueClass = (*env)->FindClass(env, "io/github/kusius/klvmp/LongValue");
             jmethodID constructor = (*env)->GetMethodID(env, klvValueClass, "<init>",
                                                         "(J)V");
             jlong javaValue = (jlong)nativeKLV->uint64Value;
@@ -224,7 +224,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
             break;
         case GMK_KLV_VALUE_UNKNOWN:
         {
-            jclass klvValueClass = (*env)->FindClass(env, "io/kusius/klvmp/UnknownValue");
+            jclass klvValueClass = (*env)->FindClass(env, "io/github/kusius/klvmp/UnknownValue");
             jmethodID constructor = (*env)->GetMethodID(env, klvValueClass, "<init>",
                                                         "()V");
             jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor);
@@ -236,7 +236,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
             break;
         case GMK_KLV_VALUE_PARSE_ERROR:
         {
-            jclass klvValueClass = (*env)->FindClass(env, "io/kusius/klvmp/ParseErrorValue");
+            jclass klvValueClass = (*env)->FindClass(env, "io/github/kusius/klvmp/ParseErrorValue");
             jmethodID constructor = (*env)->GetMethodID(env, klvValueClass, "<init>",
                                                         "()V");
             jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor);
@@ -251,7 +251,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
 }
 
 JNIEXPORT void JNICALL
-Java_io_kusius_klvmp_JVMKLVParser_disposeParser(JNIEnv *env, jobject thiz,
+Java_io_github_kusius_klvmp_JVMKLVParser_disposeParser(JNIEnv *env, jobject thiz,
                                                     jint native_handle) {
 
     parsers[native_handle] = (KLVParserJNI) {
@@ -259,9 +259,4 @@ Java_io_kusius_klvmp_JVMKLVParser_disposeParser(JNIEnv *env, jobject thiz,
         .nativeParser = gmk_newKlvParser()
     };
 
-}
-
-JNIEXPORT jint JNICALL
-Java_io_kusius_klvmp_Platform_1jvmKt_nativeFunction(JNIEnv *env, jclass clazz, jint a) {
-    return 42 + a;
 }

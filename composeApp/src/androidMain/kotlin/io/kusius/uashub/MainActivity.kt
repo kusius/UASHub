@@ -13,8 +13,8 @@ import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.DefaultHttpDataSource
-import io.kusius.klvmp.OnKLVBytesListener
-import io.kusius.klvmp.getPlatformKLVMP
+import io.github.kusius.klvmp.OnKLVBytesListener
+import io.github.kusius.klvmp.getPlatformKLVMP
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch

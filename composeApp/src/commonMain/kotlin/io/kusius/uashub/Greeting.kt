@@ -1,6 +1,6 @@
 package io.kusius.uashub
 
-import io.kusius.klvmp.getPlatformKLVMP
+import io.github.kusius.klvmp.getPlatformKLVMP
 
 class Greeting {
     private val platform = getPlatformKLVMP()

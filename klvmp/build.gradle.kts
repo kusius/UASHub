@@ -94,7 +94,7 @@ kotlin {
 }
 
 android {
-    namespace = "org.kusius.klvmp"
+    namespace = "io.github.kusius.klvmp"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
@@ -131,7 +131,7 @@ mavenPublishing {
 
     signAllPublications()
 
-    coordinates(group.toString(), "library", version.toString())
+    coordinates(group.toString(), "klvmp", version.toString())
 
     pom {
         name = "KLV Multiplatform"
@@ -149,7 +149,7 @@ mavenPublishing {
             developer {
                 id = "gmk"
                 name = "Kusius"
-                url = "ZZZ"
+                url = "https://kusius.github.io"
             }
         }
         scm {

@@ -1,4 +1,4 @@
-package io.kusius.klvmp
+package io.github.kusius.klvmp
 
 /**
  * Represents a UAS dataset information frame as received from a set of KLV elements

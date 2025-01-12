@@ -1,4 +1,4 @@
-package io.kusius.klvmp
+package io.github.kusius.klvmp
 
 
 internal enum class ValueType {

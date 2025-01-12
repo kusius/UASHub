@@ -1,4 +1,4 @@
-package io.kusius.klvmp
+package io.github.kusius.klvmp
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +20,7 @@ internal class JVMKLVParser(private val nativeHandle: Int) : KLVParser {
         // Allocate some memory for the native function to write the results if any
         val resultSize = 512
         val result = Array(resultSize) {
-            KLVElement(0,0,ValueType.UNKNOWN, byteArrayOf(), UnknownValue)
+            KLVElement(0,0, ValueType.UNKNOWN, byteArrayOf(), UnknownValue)
         }
 
         val parsedCount = parseKLV(nativeHandle, bytes, result, resultSize)
@@ -36,7 +36,7 @@ internal class JVMKLVParser(private val nativeHandle: Int) : KLVParser {
 
 }
 
-internal class JVMTsKLVDemuxer(private val nativeHandle: Int)  : TsKLVDemuxer{
+internal class JVMTsKLVDemuxer(private val nativeHandle: Int)  : TsKLVDemuxer {
     private external fun disposeDemuxer(nativeHandle: Int)
     private external fun demuxKLVNative(nativeHandle: Int, streamData: ByteArray)
     private external fun registerCallback(nativeHandle: Int)

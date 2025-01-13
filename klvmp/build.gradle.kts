@@ -12,8 +12,8 @@ plugins {
     alias(libs.plugins.vanniktech.mavenPublish)
 }
 
-group = "io.kusius"
-version = "1.0.0"
+group = "io.github.kusius"
+version = "0.0.1"
 
 // This task is used on JVM platforms (except android).
 // Builds the native C/C++ libraries we use for KLV parsing and

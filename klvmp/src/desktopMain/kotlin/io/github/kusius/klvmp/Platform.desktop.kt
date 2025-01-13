@@ -1,6 +1,6 @@
 package io.github.kusius.klvmp
 
-import io.kusius.klvmp.generated.resources.Res
+import io.github.kusius.klvmp.generated.resources.Res
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.InternalResourceApi
 import java.lang.Exception

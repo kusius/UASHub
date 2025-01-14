@@ -41,14 +41,6 @@ compose.resources {
 }
 
 kotlin {
-    jvm("desktop") {
-        // Before processing resources we build the native libraries
-        val processResources = compilations["main"].processResourcesTaskName
-        (tasks[processResources] as ProcessResources).apply {
-            dependsOn("buildJniNative")
-        }
-    }
-
     androidTarget {
         publishLibraryVariants("release")
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
@@ -56,10 +48,19 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
+
     iosX64()
     iosArm64()
     iosSimulatorArm64()
-    linuxX64()
+    applyDefaultHierarchyTemplate()
+
+    jvm("desktop") {
+        // Before processing resources we build the native libraries
+        val processResources = compilations["main"].processResourcesTaskName
+        (tasks[processResources] as ProcessResources).apply {
+            dependsOn("buildJniNative")
+        }
+    }
 
     sourceSets {
         val commonMain by getting {
@@ -70,6 +71,9 @@ kotlin {
             }
         }
 
+        val iosMain by getting {
+
+        }
         val jvmMain by creating {
             dependsOn(commonMain)
         }
@@ -83,6 +87,18 @@ kotlin {
 
         val androidMain by getting {
             dependsOn(jvmMain)
+        }
+
+        val iosArm64Main by getting {
+
+        }
+
+        val iosX64Main by getting {
+
+        }
+
+        val iosSimulatorArm64Main by getting {
+
         }
 
         val commonTest by getting {

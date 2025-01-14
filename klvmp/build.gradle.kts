@@ -71,13 +71,9 @@ kotlin {
             }
         }
 
-        val iosMain by getting {
-
-        }
         val jvmMain by creating {
             dependsOn(commonMain)
         }
-
 
         val desktopMain by getting {
             dependsOn(jvmMain)
@@ -89,16 +85,13 @@ kotlin {
             dependsOn(jvmMain)
         }
 
-        val iosArm64Main by getting {
-
-        }
-
-        val iosX64Main by getting {
-
-        }
-
-        val iosSimulatorArm64Main by getting {
-
+        val iosArm64Main by getting
+        val iosX64Main by getting
+        val iosSimulatorArm64Main by getting
+        val iosMain by getting {
+            iosArm64Main.dependsOn(this)
+            iosX64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
         }
 
         val commonTest by getting {

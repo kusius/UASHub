@@ -111,7 +111,7 @@ Java_io_github_kusius_klvmp_JVMKLVParser_parseKLV(JNIEnv *env, jobject obj,
     jbyte* b = (*env)->GetByteArrayElements(env, bytes, &isCopy);
 
     struct gmk_KLVElement nativeResult[512] = {0};
-    int parsedCount = gmk_klvParseResult(&(parsers[index].nativeParser), b, arrayLength, nativeResult, 512);
+    int parsedCount = gmk_klvParseResult(&(parsers[index].nativeParser), (unsigned char *)b, arrayLength, nativeResult, 512);
 
     // Transfer results into Java array, taking care not to overflow given result array
     parsedCount = parsedCount < resultSize ? parsedCount : resultSize;

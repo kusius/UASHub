@@ -134,7 +134,7 @@ Java_io_github_kusius_klvmp_JVMKLVParser_parseKLV(JNIEnv *env, jobject obj,
         jfieldID enumTypeFID = mapValueType(nativeKlv.valueType);
         jobject enumType = (*env)->GetStaticObjectField(env, clValueType, enumTypeFID);
 
-        fieldId = (*env)->GetFieldID(env, klElementClass, "valueType", "Lio/kusius/klvmp/ValueType;");
+        fieldId = (*env)->GetFieldID(env, klElementClass, "valueType", "Lio/github/kusius/klvmp/ValueType;");
         (*env)->SetObjectField(env, klv, fieldId, enumType);
 
         // Value
@@ -151,7 +151,7 @@ Java_io_github_kusius_klvmp_JVMKLVParser_parseKLV(JNIEnv *env, jobject obj,
 }
 
 void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj) {
-    jfieldID fieldId = (*env)->GetFieldID(env, class, "value", "Lio/kusius/klvmp/KLVValue;");
+    jfieldID fieldId = (*env)->GetFieldID(env, class, "value", "Lio/github/kusius/klvmp/KLVValue;");
     // based on value type, we allocate a new object of the type KLVValue (sealed class), set its value
     // and set it on the object
 
@@ -166,7 +166,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
             jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor, javaValue);
 
             jfieldID valueFID = (*env)->GetFieldID(env, class, "value",
-                                                   "Lio/kusius/klvmp/KLVValue;");
+                                                   "Lio/github/kusius/klvmp/KLVValue;");
             (*env)->SetObjectField(env, obj, valueFID, klvValueObj);
         }
             break;
@@ -179,7 +179,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
             jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor, javaValue);
 
             jfieldID valueFID = (*env)->GetFieldID(env, class, "value",
-                                                   "Lio/kusius/klvmp/KLVValue;");
+                                                   "Lio/github/kusius/klvmp/KLVValue;");
             (*env)->SetObjectField(env, obj, valueFID, klvValueObj);
         }
             break;
@@ -192,7 +192,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
             jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor, javaValue);
 
             jfieldID valueFID = (*env)->GetFieldID(env, class, "value",
-                                                   "Lio/kusius/klvmp/KLVValue;");
+                                                   "Lio/github/kusius/klvmp/KLVValue;");
             (*env)->SetObjectField(env, obj, valueFID, klvValueObj);
         }
             break;
@@ -205,7 +205,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
             jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor, javaValue);
 
             jfieldID valueFID = (*env)->GetFieldID(env, class, "value",
-                                                   "Lio/kusius/klvmp/KLVValue;");
+                                                   "Lio/github/kusius/klvmp/KLVValue;");
             (*env)->SetObjectField(env, obj, valueFID, klvValueObj);
         }
             break;
@@ -218,7 +218,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
             jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor, javaValue);
 
             jfieldID valueFID = (*env)->GetFieldID(env, class, "value",
-                                                   "Lio/kusius/klvmp/KLVValue;");
+                                                   "Lio/github/kusius/klvmp/KLVValue;");
             (*env)->SetObjectField(env, obj, valueFID, klvValueObj);
         }
             break;
@@ -230,7 +230,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
             jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor);
 
             jfieldID valueFID = (*env)->GetFieldID(env, class, "value",
-                                                   "Lio/kusius/klvmp/KLVValue;");
+                                                   "Lio/github/kusius/klvmp/KLVValue;");
             (*env)->SetObjectField(env, obj, valueFID, klvValueObj);
         }
             break;
@@ -242,7 +242,7 @@ void setValue(JNIEnv* env, gmk_KLVElement* nativeKLV, jclass class, jobject obj)
             jobject klvValueObj = (*env)->NewObject(env, klvValueClass, constructor);
 
             jfieldID valueFID = (*env)->GetFieldID(env, class, "value",
-                                                   "Lio/kusius/klvmp/KLVValue;");
+                                                   "Lio/github/kusius/klvmp/KLVValue;");
             (*env)->SetObjectField(env, obj, valueFID, klvValueObj);
         }
             break;

@@ -2,7 +2,12 @@
 # This ensures that a certain set of CMake features is available to
 # your build.
 
-cmake_minimum_required(VERSION 3.4.1)
+cmake_minimum_required(VERSION 3.5)
+project(klvmp)
+
+find_package(JNI REQUIRED)
+
+include_directories(${JNI_INCLUDE_DIRS})
 
 # Specifies a library name, specifies whether the library is STATIC or
 # SHARED, and provides relative paths to the source code. You can
@@ -19,6 +24,14 @@ add_library( # Specifies the name of the library.
         # Provides a relative path to your source file(s).
         klv-ndk-wrapper.c)
 
-target_link_libraries(
-        klv
+add_library(
+        tsdemux
+
+        SHARED
+
+        tsdemux/tsdemux-ndk-wrapper.cpp tsdemux/tsdemux.c
 )
+
+target_link_libraries(klv)
+
+target_link_libraries(tsdemux)
